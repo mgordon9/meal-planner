@@ -1,15 +1,16 @@
-class MealController < ApplicationController
+class MealsController < ApplicationController
   def create
     schedule = Schedule.find(params[:schedule_id])
-    fat_secret_food_ids = params[:fat_secret_food_ids]
+    request_body = JSON.parse(request.body.read)
+    fat_secret_food_ids = request_body["fat_secret_food_ids"]
     foods_nutrition_facts = fat_secret_food_ids.map do |fat_secret_food_id|
       food_nutrition_facts = get_nutrition_facts(fat_secret_food_id)
       {
-        fat_secret_food_id: fat_secret_food_id
+        fat_secret_food_id: fat_secret_food_id,
         calories: food_nutrition_facts[:calories],
         carbohydrates: food_nutrition_facts[:carbohydrates],
         fat: food_nutrition_facts[:fat],
-        protien: food_nutrition_facts[:protien]
+        protein: food_nutrition_facts[:protien]
       }
     end
 
@@ -17,6 +18,8 @@ class MealController < ApplicationController
     foods_nutrition_facts.each do |nutrition_facts|
       meal.foods.create(nutrition_facts)
     end
+
+    render json: meal
   end
 
   private
@@ -34,11 +37,11 @@ class MealController < ApplicationController
       )
     )
 
-    food = JSON.parse(response.body)["food"]
+    food = JSON.parse(response.body)["food"]["servings"]["serving"].first
     {
       calories: food["calories"],
       fat: food["fat"],
-      protein: food["fat"],
+      protein: food["protein"],
       carbohydrates: food["carbohydrates"]
     }
   end

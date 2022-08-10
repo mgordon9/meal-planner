@@ -5,4 +5,8 @@ Rails.application.routes.draw do
   # root "articles#index"
 
   get '/food/search', to: 'food#search'
+
+  resources :schedules, only: [:index, :show, :create] do
+    resources :meals, only: [:create]
+  end
 end
